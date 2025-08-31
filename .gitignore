@@ -1,0 +1,8 @@
+# VSCode
+.vscode
+
+# Node Modules
+node_modules
+
+# Environmen
+.env
