@@ -4,11 +4,16 @@
 # Node Modules
 node_modules
 
+# Dist
+dist
+/frontend/dist/
+
 # Environment
 .env
 
 # dependencies
 /node_modules
+/dist
 /.pnp
 .pnp.js
 
