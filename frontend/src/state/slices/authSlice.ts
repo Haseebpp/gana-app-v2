@@ -38,6 +38,20 @@ const initialState: AuthState = {
   error: null,
 };
 
+// Centralized extraction of API error messages
+function extractErrorMessage(err: any, fallback: string) {
+  const data = err?.response?.data;
+  if (!data) return fallback;
+  // Prefer field-level validation errors over a generic message
+  const errors = data.errors;
+  if (errors && typeof errors === "object") {
+    const first = Object.values(errors).find((v) => typeof v === "string" && v.trim());
+    if (first) return String(first);
+  }
+  if (typeof data.message === "string" && data.message.trim()) return data.message;
+  return fallback;
+}
+
 export const login = createAsyncThunk(
   "auth/login",
   async (payload: { number: string; password: string }, { rejectWithValue }) => {
@@ -45,7 +59,7 @@ export const login = createAsyncThunk(
       const res = await AuthAPI.login(payload);
       return res;
     } catch (err: any) {
-      return rejectWithValue(err?.response?.data?.message || "Login failed");
+      return rejectWithValue(extractErrorMessage(err, "Login failed"));
     }
   }
 );
@@ -57,7 +71,7 @@ export const register = createAsyncThunk(
       const res = await AuthAPI.register(payload);
       return res;
     } catch (err: any) {
-      return rejectWithValue(err?.response?.data?.message || "Registration failed");
+      return rejectWithValue(extractErrorMessage(err, "Registration failed"));
     }
   }
 );
@@ -67,7 +81,7 @@ export const fetchMe = createAsyncThunk("auth/me", async (_, { rejectWithValue }
     const res = await AuthAPI.me();
     return res.user;
   } catch (err: any) {
-    return rejectWithValue(err?.response?.data?.message || "Fetch me failed");
+    return rejectWithValue(extractErrorMessage(err, "Fetch me failed"));
   }
 });
 
@@ -135,4 +149,3 @@ const authSlice = createSlice({
 
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;
-

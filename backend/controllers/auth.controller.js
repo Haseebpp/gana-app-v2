@@ -36,7 +36,7 @@ const registerUser = asyncHandler(async (req, res) => {
     userExist: Boolean(existing),
   });
 
-  if (!valid) return res.status(422).json({ errors });
+  if (!valid) return res.status(422).json({ message: "Validation failed", errors });
 
   // hash password securely
   const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -60,7 +60,7 @@ const loginUser = asyncHandler(async (req, res) => {
   // validate basic payload
   const { errors, valid } = validateLogin({ number, password, userExist: Boolean(user) });
 
-  if (!valid) return res.status(422).json({ errors });
+  if (!valid) return res.status(422).json({ message: "Validation failed", errors });
 
   // verify credentials
   const passwordOk = user ? await bcrypt.compare(password, user.password) : false;
