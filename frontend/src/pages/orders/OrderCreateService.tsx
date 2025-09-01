@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Checkbox from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAppDispatch, useAppSelector } from "@/state/store";
 import { selectDraft, setServiceType, setGarmentCount, setExpress } from "@/state/slices/orderSlice";
 
@@ -100,7 +100,7 @@ export default function OrderCreateService() {
             <label className="flex items-start gap-2 select-none">
               <Checkbox
                 checked={draft.express}
-                onChange={(e) => dispatch(setExpress((e.target as HTMLInputElement).checked))}
+                onCheckedChange={(val) => dispatch(setExpress(!!val))}
               />
               <div>
                 <div className="text-sm font-medium">Express Service (+50% fee)</div>

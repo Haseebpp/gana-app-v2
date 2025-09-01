@@ -20,7 +20,7 @@ const orderSchema = new mongoose.Schema(
 
     // ---- Pickup location (choose one: geo OR address) ----
     pickupLocation: {
-      type: { type: String, enum: ["Point"], default: "Point" },
+      type: { type: String, enum: ["Point"] },
       coordinates: {
         type: [Number], // [lng, lat]
         validate: {
@@ -34,7 +34,7 @@ const orderSchema = new mongoose.Schema(
 
     // ---- Delivery location (choose one: geo OR address) ----
     deliveryLocation: {
-      type: { type: String, enum: ["Point"], default: "Point" },
+      type: { type: String, enum: ["Point"] },
       coordinates: {
         type: [Number], // [lng, lat]
         validate: {
@@ -82,6 +82,18 @@ orderSchema.pre("validate", function (next) {
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ pickupLocation: "2dsphere" });
 orderSchema.index({ deliveryLocation: "2dsphere" });
+
+// Clean up incomplete geo subdocs on save to avoid invalid index keys
+orderSchema.pre("save", function (next) {
+  const isValidCoords = (pl) => Array.isArray(pl?.coordinates) && pl.coordinates.length === 2 && pl.coordinates.every((n) => Number.isFinite(n));
+  if (this.pickupLocation && !isValidCoords(this.pickupLocation)) {
+    this.pickupLocation = undefined;
+  }
+  if (this.deliveryLocation && !isValidCoords(this.deliveryLocation)) {
+    this.deliveryLocation = undefined;
+  }
+  next();
+});
 
 export const Order =
   mongoose.models.Order || mongoose.model("Order", orderSchema);

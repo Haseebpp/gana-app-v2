@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/state/store";
 import { selectDraft, selectDraftPricing } from "@/state/slices/orderSlice";
+import { selectIsAuthenticated } from "@/state/slices/authSlice";
+import { createOrder } from "@/state/slices/orderSlice";
 
 function Stepper({ step }: { step: 1 | 2 | 3 }) {
   const base = "h-8 w-8 grid place-items-center rounded-full border";
@@ -31,22 +33,61 @@ function Stepper({ step }: { step: 1 | 2 | 3 }) {
 export default function OrderReview() {
   const draft = useAppSelector(selectDraft);
   const prices = useAppSelector(selectDraftPricing);
+  const isAuthed = useAppSelector(selectIsAuthenticated);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const confirm = async () => {
-    // For the outline, we only validate presence of a few draft fields.
+    // Require authentication before creating an order
+    if (!isAuthed) {
+      alert("Please login to confirm your order");
+      navigate("/login?redirect=/orders/new/review");
+      return;
+    }
+    // Basic client-side guard to reduce avoidable 422s
     if (!draft.serviceType || !draft.garmentCount || !draft.pickupDate || !draft.pickupTime) {
       return alert("Please complete previous steps");
     }
 
-    // This is where you would map the draft to a CreateOrderPayload and
-    // dispatch the createOrder thunk. We keep it as a guided TODO.
-    // Example:
-    // await dispatch(createOrder({ ...mappedPayload }))
+    try {
+      // Derive delivery defaults if user didn't set them explicitly
+      const pickupDate = new Date(draft.pickupDate);
+      let deliveryDateStr = draft.deliveryDate;
+      if (!deliveryDateStr) {
+        const d = new Date(pickupDate);
+        // Express: same-day; otherwise next-day
+        d.setDate(d.getDate() + (draft.express ? 0 : 1));
+        deliveryDateStr = d.toISOString();
+      }
 
-    alert("Order confirmed (outline). Integrate API call next.");
-    navigate("/orders");
+      // Ensure we pass a date string acceptable by backend validation
+      const toISODateOnly = (isoOrDate: string) => new Date(isoOrDate).toISOString();
+
+      const payload = {
+        serviceType: draft.serviceType,
+        pickupDate: toISODateOnly(draft.pickupDate),
+        pickupTime: draft.pickupTime,
+        deliveryDate: toISODateOnly(deliveryDateStr),
+        deliveryTime: draft.deliveryTime || (draft.express ? "6:00 PM" : "6:00 PM"),
+        // Locations: we only collect address/placeId in this flow
+        pickupLocation: undefined,
+        pickupAddress: draft.pickupAddress || "",
+        pickupPlaceId: draft.pickupPlaceId || "",
+        deliveryLocation: undefined,
+        deliveryAddress: draft.deliveryAddress || draft.pickupAddress || "",
+        deliveryPlaceId: draft.deliveryPlaceId || draft.pickupPlaceId || "",
+        instructions: draft.instructions || "",
+        garmentCount: draft.garmentCount,
+        totalPrice: prices.total,
+        status: "pending" as const,
+      };
+
+      // Fire API request
+      await dispatch(createOrder(payload) as any).unwrap();
+      navigate("/orders");
+    } catch (err: any) {
+      alert(typeof err === "string" ? err : "Failed to create order");
+    }
   };
 
   return (
