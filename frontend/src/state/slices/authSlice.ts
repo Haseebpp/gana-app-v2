@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "@/state/store";
 import type { User } from "@/state/services/authService";
 import * as AuthAPI from "@/state/services/authService";
 
@@ -149,3 +150,9 @@ const authSlice = createSlice({
 
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;
+
+// Selectors
+export const selectAuth = (state: RootState) => state.auth;
+export const selectUser = (state: RootState) => state.auth.user;
+export const selectToken = (state: RootState) => state.auth.token;
+export const selectIsAuthenticated = (state: RootState) => Boolean(state.auth.token);

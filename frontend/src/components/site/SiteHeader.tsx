@@ -1,10 +1,21 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
+import { useAppDispatch, useAppSelector } from "@/state/store";
+import { logout } from "@/state/slices/authSlice";
 
 // Simple, responsive site header built with shadcn/ui buttons and semantic
 // markup. The navigation links point to on-page sections; primary actions link
 // to auth and the order flow.
 export default function SiteHeader() {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
+
+  const onLogout = () => {
+    dispatch(logout());
+    navigate("/", { replace: true });
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/90 backdrop-blur">
       <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
@@ -25,9 +36,20 @@ export default function SiteHeader() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Link to="/login">
-            <Button variant="outline">Sign In</Button>
-          </Link>
+          {isAuthed ? (
+            <>
+              <Link to="/orders">
+                <Button variant="outline">My Orders</Button>
+              </Link>
+              <Button onClick={onLogout}>Sign Out</Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="outline">Sign In</Button>
+              </Link>
+            </>
+          )}
           <Link to="/orders/new/service">
             <Button>Book Now</Button>
           </Link>

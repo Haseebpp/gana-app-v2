@@ -1,6 +1,6 @@
 import { Provider } from "react-redux";
-import { store } from "@/state/store";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { store, useAppSelector } from "@/state/store";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -10,10 +10,15 @@ import OrderSchedule from "@/pages/orders/OrderSchedule";
 import OrderReview from "@/pages/orders/OrderReview";
 import OrderDetail from "@/pages/orders/OrderDetail";
 
+function PublicOnlyRoute({ children }: { children: JSX.Element }) {
+  const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
+  return isAuthed ? <Navigate to="/" replace /> : children;
+}
+
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
-  { path: "/login", element: <Login /> },
-  { path: "/register", element: <Register /> },
+  { path: "/login", element: <PublicOnlyRoute><Login /></PublicOnlyRoute> },
+  { path: "/register", element: <PublicOnlyRoute><Register /></PublicOnlyRoute> },
   // --- Orders ---
   { path: "/orders", element: <OrdersList /> },
   { path: "/orders/new/service", element: <OrderCreateService /> },
