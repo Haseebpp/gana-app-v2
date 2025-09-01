@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* App-level tweaks */
+:root {
+  color-scheme: light dark;
+}
+
+html, body, #root {
+  height: 100%;
+}
+

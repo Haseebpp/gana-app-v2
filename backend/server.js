@@ -4,10 +4,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
 
-import { connectDB } from "./db/connectDB.js";
+import { connectDB } from "./config/db.js";
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
 
-import authRoutes from "./routes/auth.route.js";
+import authRoutes from "./routes/auth.routes.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -24,9 +24,14 @@ app.use(cookieParser()); // Parse cookies for authentication/session handling
 
 // Enable CORS (Cross-Origin Resource Sharing)
 // "credentials: true" allows cookies/headers between FE & BE
+const origins = (process.env.CORS_ORIGIN || process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: origins,
     credentials: true,
   })
 );
@@ -49,8 +54,8 @@ app.use("/api/auth", authRoutes);
 // -----------------------
 // Error Handling Middleware
 // -----------------------
-app.use(notFound);       // Handle 404s
-app.use(errorHandler);   // Centralized error handler
+app.use(notFound); // Handle 404s
+app.use(errorHandler); // Centralized error handler
 
 // -----------------------
 // Production Static File Serving
@@ -71,12 +76,13 @@ async function start() {
   try {
     await connectDB(); // Connect to MongoDB
     app.listen(PORT, () =>
-      console.log(`✅ Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
+      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
     );
   } catch (err) {
-    console.error("❌ Failed to start server:", err);
+    console.error("Failed to start server:", err);
     process.exit(1);
   }
 }
 
 start();
+
