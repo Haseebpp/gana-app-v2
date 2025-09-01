@@ -23,13 +23,18 @@ export type OrderDraft = {
   instructions?: string;
 };
 
+type ApiErrorPayload =
+  | string
+  | { message?: string; errors?: Record<string, string> }
+  | Record<string, string>;
+
 type OrdersState = {
   draft: OrderDraft;
   // Read models
   items: Order[];
   current: Order | null;
   status: "idle" | "loading" | "succeeded" | "failed";
-  error?: string;
+  error?: ApiErrorPayload;
 };
 
 const initialState: OrdersState = {
@@ -47,7 +52,10 @@ export const createOrder = createAsyncThunk(
       const { order } = await apiCreateOrder(payload);
       return order;
     } catch (err: any) {
-      return rejectWithValue(err?.response?.data?.message || "Failed to create order");
+      // Preserve structured validation errors from backend
+      const data = err?.response?.data;
+      if (data && (data.errors || data.message)) return rejectWithValue(data);
+      return rejectWithValue("Failed to create order");
     }
   }
 );
@@ -135,7 +143,7 @@ const ordersSlice = createSlice({
       })
       .addCase(createOrder.rejected, (state, { payload }) => {
         state.status = "failed";
-        state.error = (payload as string) || "Failed to create order";
+        state.error = (payload as any) || "Failed to create order";
       })
       .addCase(fetchMyOrders.pending, (state) => {
         state.status = "loading";

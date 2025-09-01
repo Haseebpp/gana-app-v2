@@ -86,7 +86,21 @@ export default function OrderReview() {
       await dispatch(createOrder(payload) as any).unwrap();
       navigate("/orders");
     } catch (err: any) {
-      alert(typeof err === "string" ? err : "Failed to create order");
+      // Display all validation errors when available
+      let message = "Failed to create order";
+      const data = err && typeof err === "object" ? err : null;
+      const errorsObj = data?.errors as Record<string, string> | undefined;
+      if (errorsObj && typeof errorsObj === "object") {
+        const lines = Object.entries(errorsObj)
+          .filter(([, v]) => typeof v === "string" && v.trim())
+          .map(([k, v]) => `• ${v}`);
+        if (lines.length) message = `Please fix the following:\n\n${lines.join("\n")}`;
+      } else if (data?.message) {
+        message = String(data.message);
+      } else if (typeof err === "string") {
+        message = err;
+      }
+      alert(message);
     }
   };
 
