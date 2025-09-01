@@ -13,11 +13,10 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["src/components/*"],
-      "@/state/*": ["src/state/*"],
-      "@/pages/*": ["src/pages/*"],
-      "@/lib/*": ["src/lib/*"],
-      "@/services/*": ["src/state/services/*"]
+      "@/*": [
+        "./src/*"
+      ]
+
     }
   },
   "include": ["src"]
