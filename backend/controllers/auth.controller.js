@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import asyncHandler from "express-async-handler";
 
 import { User } from "../models/user.model.js";
-import { validateRegister, validateLogin } from "../validation/auth.validation.js";
+import { validateRegister, validateLogin, validateUpdate } from "../validation/auth.validation.js";
 
 // tunables (can be set via env)
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 10);
@@ -79,3 +79,38 @@ const getProfile = asyncHandler(async (req, res) => {
 });
 
 export { registerUser, loginUser, getProfile };
+// @desc    Update current user profile
+// @route   PUT /api/auth/me
+// @access  Private (JWT required)
+const updateProfile = asyncHandler(async (req, res) => {
+  const { name, number, password, repeatPassword } = req.body || {};
+
+  // Check if another user already has this number
+  let existing = null;
+  if (typeof number === "string" && number.trim()) {
+    existing = await User.findOne({ number, _id: { $ne: req.user._id } });
+  }
+
+  const { errors, valid } = validateUpdate({ name, number, password, repeatPassword, userExist: Boolean(existing) });
+  if (!valid) return res.status(422).json({ message: "Validation failed", errors });
+
+  const update = { };
+  if (typeof name === "string") update.name = name.trim();
+  if (typeof number === "string") update.number = number.trim();
+  if (typeof password === "string" && password.trim()) {
+    update.password = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  }
+
+  const user = await User.findByIdAndUpdate(req.user._id, update, { new: true });
+  return res.status(200).json({ user: toPublicUser(user) });
+});
+
+// @desc    Delete current user profile
+// @route   DELETE /api/auth/me
+// @access  Private (JWT required)
+const deleteProfile = asyncHandler(async (req, res) => {
+  await User.findByIdAndDelete(req.user._id);
+  return res.status(200).json({ message: "Account deleted" });
+});
+
+export { registerUser, loginUser, getProfile, updateProfile, deleteProfile };

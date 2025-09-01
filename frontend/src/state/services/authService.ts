@@ -35,3 +35,15 @@ export async function me(): Promise<{ user: User }> {
   const { data } = await api.get<{ user: User }>(`/auth/me`);
   return data;
 }
+
+export type UpdateProfilePayload = { name: string; number: string; password?: string; repeatPassword?: string };
+
+export async function updateMe(payload: UpdateProfilePayload): Promise<{ user: User }> {
+  const { data } = await api.put<{ user: User }>(`/auth/me`, payload);
+  return data;
+}
+
+export async function deleteMe(): Promise<{ message: string }> {
+  const { data } = await api.delete<{ message: string }>(`/auth/me`);
+  return data;
+}

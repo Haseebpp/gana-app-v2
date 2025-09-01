@@ -37,6 +37,9 @@ export default function SiteHeader() {
         <div className="flex items-center gap-2">
           {isAuthed ? (
             <>
+              <Link to="/profile">
+                <Button variant="outline">Profile</Button>
+              </Link>
               <Link to="/orders">
                 <Button variant="outline">My Orders</Button>
               </Link>
@@ -57,4 +60,3 @@ export default function SiteHeader() {
     </header>
   );
 }
-

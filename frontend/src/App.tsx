@@ -11,6 +11,7 @@ import OrderReview from "@/pages/orders/OrderReview";
 import OrderDetail from "@/pages/orders/OrderDetail";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
+import Profile from "@/pages/Profile";
 
 function PublicOnlyRoute({ children }: { children: JSX.Element }) {
   const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
@@ -27,6 +28,11 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+  const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
+  return isAuthed ? children : <Navigate to="/login" replace />;
+}
+
 const router = createBrowserRouter([
   { path: "/", element: <AppLayout><Home /></AppLayout> },
   { path: "/login", element: <AppLayout><PublicOnlyRoute><Login /></PublicOnlyRoute></AppLayout> },
@@ -37,6 +43,8 @@ const router = createBrowserRouter([
   { path: "/orders/new/schedule", element: <AppLayout><OrderSchedule /></AppLayout> },
   { path: "/orders/new/review", element: <AppLayout><OrderReview /></AppLayout> },
   { path: "/orders/:id", element: <AppLayout><OrderDetail /></AppLayout> },
+  // --- Profile ---
+  { path: "/profile", element: <AppLayout><ProtectedRoute><Profile /></ProtectedRoute></AppLayout> },
 ]);
 
 export default function App() {

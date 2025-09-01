@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "@/state/store";
 import type { User } from "@/state/services/authService";
 import * as AuthAPI from "@/state/services/authService";
+import type { UpdateProfilePayload } from "@/state/services/authService";
 
 export type AuthState = {
   user: User | null;
@@ -86,6 +87,30 @@ export const fetchMe = createAsyncThunk("auth/me", async (_, { rejectWithValue }
   }
 });
 
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (payload: UpdateProfilePayload, { rejectWithValue }) => {
+    try {
+      const res = await AuthAPI.updateMe(payload);
+      return res.user;
+    } catch (err: any) {
+      return rejectWithValue(extractErrorMessage(err, "Update failed"));
+    }
+  }
+);
+
+export const deleteAccount = createAsyncThunk(
+  "auth/deleteAccount",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await AuthAPI.deleteMe();
+      return res.message || "Account deleted";
+    } catch (err: any) {
+      return rejectWithValue(extractErrorMessage(err, "Delete failed"));
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -144,6 +169,34 @@ const authSlice = createSlice({
       })
       .addCase(fetchMe.rejected, (state) => {
         state.status = "failed";
+      })
+      .addCase(updateProfile.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action: PayloadAction<User>) => {
+        state.status = "succeeded";
+        state.user = action.payload;
+        saveToStorage({ user: state.user, token: state.token });
+      })
+      .addCase(updateProfile.rejected, (state, action: any) => {
+        state.status = "failed";
+        state.error = action.payload || "Update failed";
+      })
+      .addCase(deleteAccount.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(deleteAccount.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.user = null;
+        state.token = null;
+        saveToStorage({ user: null, token: null });
+        AuthAPI.setAuthToken(null);
+      })
+      .addCase(deleteAccount.rejected, (state, action: any) => {
+        state.status = "failed";
+        state.error = action.payload || "Delete failed";
       });
   },
 });

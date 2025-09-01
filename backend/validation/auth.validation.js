@@ -76,3 +76,31 @@ const validateLogin = (data) => {
 };
 
 export { validateRegister, validateLogin };
+// --- Update Profile ---------------------------------------------------------
+const validateUpdate = (data) => {
+  const d = sanitize(data);
+  const errors = {};
+
+  // name (required on update)
+  if (validator.isEmpty(d.name)) errors.nameError = MSG.required("Name");
+
+  // number (required)
+  if (validator.isEmpty(d.number)) errors.numberError = MSG.required("Number");
+  else if (!PHONE_NUMBER.test(d.number)) errors.numberError = MSG.numberFormat;
+
+  // optional password
+  if (!validator.isEmpty(d.password) && d.password.length < MIN_PASSWORD_LENGTH) {
+    errors.passwordError = MSG.passwordMin;
+  }
+
+  // If either password or repeatPassword present, they must match
+  const pwdProvided = !validator.isEmpty(d.password) || !validator.isEmpty(d.repeatPassword);
+  if (pwdProvided && d.password !== d.repeatPassword) errors.repeatPasswordError = MSG.passwordMismatch;
+
+  // number conflict flagged by caller
+  if (d.userExist) errors.numberError = MSG.numberExists;
+
+  return { errors, valid: Object.keys(errors).length === 0 };
+};
+
+export { validateRegister, validateLogin, validateUpdate };
