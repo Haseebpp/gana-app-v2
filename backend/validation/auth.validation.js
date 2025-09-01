@@ -75,7 +75,6 @@ const validateLogin = (data) => {
   return { errors, valid: Object.keys(errors).length === 0 };
 };
 
-export { validateRegister, validateLogin };
 // --- Update Profile ---------------------------------------------------------
 const validateUpdate = (data) => {
   const d = sanitize(data);

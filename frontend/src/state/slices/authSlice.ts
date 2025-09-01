@@ -4,11 +4,16 @@ import type { User } from "@/state/services/authService";
 import * as AuthAPI from "@/state/services/authService";
 import type { UpdateProfilePayload } from "@/state/services/authService";
 
+type ApiErrorPayload =
+  | string
+  | { message?: string; errors?: Record<string, string> }
+  | Record<string, string>;
+
 export type AuthState = {
   user: User | null;
   token: string | null;
   status: "idle" | "loading" | "succeeded" | "failed";
-  error?: string | null;
+  error?: ApiErrorPayload | null;
 };
 
 function loadFromStorage(): Pick<AuthState, "user" | "token"> {
@@ -41,16 +46,9 @@ const initialState: AuthState = {
 };
 
 // Centralized extraction of API error messages
-function extractErrorMessage(err: any, fallback: string) {
+function extractErrorPayload(err: any, fallback: string): ApiErrorPayload {
   const data = err?.response?.data;
-  if (!data) return fallback;
-  // Prefer field-level validation errors over a generic message
-  const errors = data.errors;
-  if (errors && typeof errors === "object") {
-    const first = Object.values(errors).find((v) => typeof v === "string" && v.trim());
-    if (first) return String(first);
-  }
-  if (typeof data.message === "string" && data.message.trim()) return data.message;
+  if (data && (typeof data === "object") && (data.errors || data.message)) return data;
   return fallback;
 }
 
@@ -61,7 +59,7 @@ export const login = createAsyncThunk(
       const res = await AuthAPI.login(payload);
       return res;
     } catch (err: any) {
-      return rejectWithValue(extractErrorMessage(err, "Login failed"));
+      return rejectWithValue(extractErrorPayload(err, "Login failed"));
     }
   }
 );
@@ -73,7 +71,7 @@ export const register = createAsyncThunk(
       const res = await AuthAPI.register(payload);
       return res;
     } catch (err: any) {
-      return rejectWithValue(extractErrorMessage(err, "Registration failed"));
+      return rejectWithValue(extractErrorPayload(err, "Registration failed"));
     }
   }
 );
@@ -83,7 +81,7 @@ export const fetchMe = createAsyncThunk("auth/me", async (_, { rejectWithValue }
     const res = await AuthAPI.me();
     return res.user;
   } catch (err: any) {
-    return rejectWithValue(extractErrorMessage(err, "Fetch me failed"));
+    return rejectWithValue(extractErrorPayload(err, "Fetch me failed"));
   }
 });
 
@@ -94,7 +92,7 @@ export const updateProfile = createAsyncThunk(
       const res = await AuthAPI.updateMe(payload);
       return res.user;
     } catch (err: any) {
-      return rejectWithValue(extractErrorMessage(err, "Update failed"));
+      return rejectWithValue(extractErrorPayload(err, "Update failed"));
     }
   }
 );
@@ -106,7 +104,7 @@ export const deleteAccount = createAsyncThunk(
       const res = await AuthAPI.deleteMe();
       return res.message || "Account deleted";
     } catch (err: any) {
-      return rejectWithValue(extractErrorMessage(err, "Delete failed"));
+      return rejectWithValue(extractErrorPayload(err, "Delete failed"));
     }
   }
 );

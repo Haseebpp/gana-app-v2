@@ -59,12 +59,15 @@ const loginUser = asyncHandler(async (req, res) => {
 
   // validate basic payload
   const { errors, valid } = validateLogin({ number, password, userExist: Boolean(user) });
-
   if (!valid) return res.status(422).json({ message: "Validation failed", errors });
 
   // verify credentials
   const passwordOk = user ? await bcrypt.compare(password, user.password) : false;
-  if (!user || !passwordOk) return res.status(401).json({ message: "Invalid credentials" });
+
+  if (!passwordOk) {
+    // Provide structured error for password mismatch
+    return res.status(401).json({ message: "Invalid credentials", errors: { passwordError: "Incorrect password" } });
+  }
 
   // successful login
   return res.status(200).json({ token: generateToken(user._id), user: toPublicUser(user) });
@@ -78,7 +81,6 @@ const getProfile = asyncHandler(async (req, res) => {
   return res.status(200).json({ user: toPublicUser(u) });
 });
 
-export { registerUser, loginUser, getProfile };
 // @desc    Update current user profile
 // @route   PUT /api/auth/me
 // @access  Private (JWT required)
