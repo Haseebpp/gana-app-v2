@@ -8,6 +8,7 @@ import { connectDB } from "./config/db.js";
 import { errorHandler, notFound } from "./middleware/error.middleware.js";
 
 import authRoutes from "./routes/auth.routes.js";
+import orderRoutes from "./routes/order.routes.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -50,6 +51,7 @@ app.get("/api/health", (req, res) => {
 // API Routes
 // -----------------------
 app.use("/api/auth", authRoutes);
+app.use("/api/orders", orderRoutes);
 
 // -----------------------
 // Error Handling Middleware
@@ -85,4 +87,3 @@ async function start() {
 }
 
 start();
-
