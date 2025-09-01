@@ -1,5 +1,14 @@
 import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAppDispatch, useAppSelector } from "@/state/store";
 import { logout } from "@/state/slices/authSlice";
 
@@ -10,6 +19,7 @@ export default function SiteHeader() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
+  const user = useAppSelector((s) => s.auth.user);
 
   const onLogout = () => {
     dispatch(logout());
@@ -37,13 +47,39 @@ export default function SiteHeader() {
         <div className="flex items-center gap-2">
           {isAuthed ? (
             <>
-              <Link to="/profile">
-                <Button variant="outline">Profile</Button>
-              </Link>
               <Link to="/orders">
                 <Button variant="outline">My Orders</Button>
               </Link>
-              <Button onClick={onLogout}>Sign Out</Button>
+              <Link to="/orders/new/service">
+                <Button>Book Now</Button>
+              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="cursor-pointer">
+                    {/* If you later add avatar URLs, place them here */}
+                    <AvatarImage src={undefined as any} alt={user?.name || "User"} />
+                    <AvatarFallback>
+                      {(user?.name || user?.number || "U").slice(0, 1).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium leading-none">{user?.name || "User"}</span>
+                      {user?.number ? (
+                        <span className="text-xs text-muted-foreground">{user.number}</span>
+                      ) : null}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => navigate("/profile")}>Profile</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onSelect={onLogout}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <>
@@ -52,9 +88,6 @@ export default function SiteHeader() {
               </Link>
             </>
           )}
-          <Link to="/orders/new/service">
-            <Button>Book Now</Button>
-          </Link>
         </div>
       </div>
     </header>
