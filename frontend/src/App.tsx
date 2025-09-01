@@ -9,22 +9,34 @@ import OrderCreateService from "@/pages/orders/OrderCreateService";
 import OrderSchedule from "@/pages/orders/OrderSchedule";
 import OrderReview from "@/pages/orders/OrderReview";
 import OrderDetail from "@/pages/orders/OrderDetail";
+import SiteHeader from "@/components/site/SiteHeader";
+import SiteFooter from "@/components/site/SiteFooter";
 
 function PublicOnlyRoute({ children }: { children: JSX.Element }) {
   const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
   return isAuthed ? <Navigate to="/" replace /> : children;
 }
 
+const AppLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="min-h-dvh flex flex-col">
+    <SiteHeader />
+    <main className="flex-1">
+      {children}
+    </main>
+    <SiteFooter />
+  </div>
+);
+
 const router = createBrowserRouter([
-  { path: "/", element: <Home /> },
-  { path: "/login", element: <PublicOnlyRoute><Login /></PublicOnlyRoute> },
-  { path: "/register", element: <PublicOnlyRoute><Register /></PublicOnlyRoute> },
+  { path: "/", element: <AppLayout><Home /></AppLayout> },
+  { path: "/login", element: <AppLayout><PublicOnlyRoute><Login /></PublicOnlyRoute></AppLayout> },
+  { path: "/register", element: <AppLayout><PublicOnlyRoute><Register /></PublicOnlyRoute></AppLayout> },
   // --- Orders ---
-  { path: "/orders", element: <OrdersList /> },
-  { path: "/orders/new/service", element: <OrderCreateService /> },
-  { path: "/orders/new/schedule", element: <OrderSchedule /> },
-  { path: "/orders/new/review", element: <OrderReview /> },
-  { path: "/orders/:id", element: <OrderDetail /> },
+  { path: "/orders", element: <AppLayout><OrdersList /></AppLayout> },
+  { path: "/orders/new/service", element: <AppLayout><OrderCreateService /></AppLayout> },
+  { path: "/orders/new/schedule", element: <AppLayout><OrderSchedule /></AppLayout> },
+  { path: "/orders/new/review", element: <AppLayout><OrderReview /></AppLayout> },
+  { path: "/orders/:id", element: <AppLayout><OrderDetail /></AppLayout> },
 ]);
 
 export default function App() {

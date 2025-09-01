@@ -29,7 +29,6 @@ export default function SiteHeader() {
         <nav className="hidden md:flex items-center gap-6 text-sm text-gray-700">
           <a href="#services" className="hover:text-black">Services</a>
           <a href="#pricing" className="hover:text-black">Pricing</a>
-          <Link to="/orders" className="hover:text-black">Track Order</Link>
           <a href="#about" className="hover:text-black">About</a>
           <a href="#contact" className="hover:text-black">Contact</a>
         </nav>

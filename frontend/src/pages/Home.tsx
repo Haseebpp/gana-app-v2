@@ -23,8 +23,6 @@ export default function Home() {
 
   return (
     <div id="home" className="min-h-screen bg-white text-gray-900">
-      <SiteHeader />
-
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-4 pt-16 pb-14 text-center">
         <h1 className="text-4xl md:text-6xl font-semibold tracking-tight">
@@ -193,8 +191,6 @@ export default function Home() {
           Have questions? Reach us at <a className="underline" href="mailto:support@gana.com">support@gana.com</a>
         </p>
       </section>
-
-      <SiteFooter />
     </div>
   );
 }
