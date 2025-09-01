@@ -11,7 +11,8 @@ import OrderReview from "@/pages/orders/OrderReview";
 import OrderDetail from "@/pages/orders/OrderDetail";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
-import Profile from "@/pages/Profile";
+import ProfileCard from "@/pages/profile/ProfileCard";
+import ProfileEdit from "@/pages/profile/ProfileEdit";
 
 function PublicOnlyRoute({ children }: { children: JSX.Element }) {
   const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
@@ -44,7 +45,8 @@ const router = createBrowserRouter([
   { path: "/orders/new/review", element: <AppLayout><OrderReview /></AppLayout> },
   { path: "/orders/:id", element: <AppLayout><OrderDetail /></AppLayout> },
   // --- Profile ---
-  { path: "/profile", element: <AppLayout><ProtectedRoute><Profile /></ProtectedRoute></AppLayout> },
+  { path: "/profile", element: <AppLayout><ProtectedRoute><ProfileCard /></ProtectedRoute></AppLayout> },
+  { path: "/profile/edit", element: <AppLayout><ProtectedRoute><ProfileEdit /></ProtectedRoute></AppLayout> },
 ]);
 
 export default function App() {
