@@ -10,6 +10,13 @@ export default function OrderDetail() {
   const { id = "" } = useParams();
   const dispatch = useAppDispatch();
   const { current, status, error } = useAppSelector((s) => s.orders);
+  const errorMsg =
+    typeof error === "string"
+      ? error
+      : error
+      ? ("message" in (error as any) && (error as any).message)
+          || Object.values((error as any).errors ?? (error as Record<string, string>) ?? {}).join(", ")
+      : "";
 
   useEffect(() => {
     if (id) dispatch(fetchOrderById(id));
@@ -25,7 +32,7 @@ export default function OrderDetail() {
       </div>
 
       {status === "loading" && <p className="text-gray-600">Loading...</p>}
-      {error && <p className="text-red-600">{error}</p>}
+      {errorMsg && <p className="text-red-600">{errorMsg}</p>}
 
       {current && (
         <Card>
@@ -68,4 +75,3 @@ export default function OrderDetail() {
     </div>
   );
 }
-

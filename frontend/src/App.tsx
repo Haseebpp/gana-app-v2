@@ -1,4 +1,5 @@
 import { Provider } from "react-redux";
+import type { ReactElement } from "react";
 import { store, useAppSelector } from "@/state/store";
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router";
 import Home from "@/pages/Home";
@@ -14,7 +15,7 @@ import SiteFooter from "@/components/site/SiteFooter";
 import ProfileCard from "@/pages/profile/ProfileCard";
 import ProfileEdit from "@/pages/profile/ProfileEdit";
 
-function PublicOnlyRoute({ children }: { children: JSX.Element }) {
+function PublicOnlyRoute({ children }: { children: ReactElement }) {
   const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
   return isAuthed ? <Navigate to="/" replace /> : children;
 }
@@ -29,7 +30,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-function ProtectedRoute({ children }: { children: JSX.Element }) {
+function ProtectedRoute({ children }: { children: ReactElement }) {
   const isAuthed = useAppSelector((s) => Boolean(s.auth.token));
   return isAuthed ? children : <Navigate to="/login" replace />;
 }

@@ -9,6 +9,13 @@ import { fetchMyOrders } from "@/state/slices/orderSlice";
 export default function OrdersList() {
   const dispatch = useAppDispatch();
   const { items, status, error } = useAppSelector((s) => s.orders);
+  const errorMsg =
+    typeof error === "string"
+      ? error
+      : error
+      ? ("message" in (error as any) && (error as any).message)
+          || Object.values((error as any).errors ?? (error as Record<string, string>) ?? {}).join(", ")
+      : "";
 
   useEffect(() => {
     // Load user's orders on first mount.
@@ -25,7 +32,7 @@ export default function OrdersList() {
       </div>
 
       {status === "loading" && <p className="text-gray-600">Loading orders...</p>}
-      {error && <p className="text-red-600">{error}</p>}
+      {errorMsg && <p className="text-red-600">{errorMsg}</p>}
 
       <div className="grid gap-3">
         {items.map((o) => (
@@ -62,4 +69,3 @@ export default function OrdersList() {
     </div>
   );
 }
-
