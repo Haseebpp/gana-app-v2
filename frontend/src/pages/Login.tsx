@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router";
+import { useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/state/store";
 import { login, fetchMe } from "@/state/slices/authSlice";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import AuthCard from "@/components/auth/AuthCard";
+import IconInput from "@/components/form/IconInput";
+import PasswordInput from "@/components/form/PasswordInput";
+import { Phone } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Login() {
   const dispatch = useAppDispatch();
@@ -35,45 +37,42 @@ export default function Login() {
   const topMessage = typeof error === "string" ? error : (errData as any)?.message;
 
   return (
-    <div className="grid place-items-center min-h-screen p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Welcome back</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={onSubmit}>
-            <div className="grid gap-2">
-              <Label htmlFor="number">Phone number</Label>
-              <Input
-                id="number"
-                placeholder="e.g. +15551234567"
-                value={number}
-                onChange={(e) => setNumber(e.target.value)}
-                required
-              />
-              {fieldErrors?.numberError && (
-                <div className="text-xs text-red-600">{fieldErrors.numberError}</div>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              {fieldErrors?.passwordError && (
-                <div className="text-xs text-red-600">{fieldErrors.passwordError}</div>
-              )}
-            </div>            <Button type="submit" disabled={status === "loading"} className="w-full">
-              {status === "loading" ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="justify-between text-sm">
-          <span className="text-gray-500">No account?</span>
-          <Link to="/register" className="text-blue-600 underline">
-            Create one
-          </Link>
-        </CardFooter>
-      </Card>
-    </div>
+    <AuthCard active="login">
+      <form className="space-y-4" onSubmit={onSubmit}>
+        <IconInput
+          id="number"
+          label="Mobile number"
+          type="tel"
+          icon={Phone}
+          value={number}
+          onChange={setNumber}
+          placeholder="05XXXXXXXX"
+          autoComplete="tel"
+          error={fieldErrors?.numberError}
+        />
+
+        <PasswordInput
+          id="password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          placeholder="Your password"
+          autoComplete="current-password"
+          error={fieldErrors?.passwordError}
+        />
+
+        <Button type="submit" disabled={status === "loading"} className="w-full h-11 rounded-lg">
+          {status === "loading" ? "Booking..." : "Book a wash"}
+        </Button>
+
+        <div className="flex items-center justify-between pt-1 text-sm">
+          <label className="inline-flex items-center gap-2 text-foreground">
+            <Checkbox id="remember" />
+            <span>Remember me</span>
+          </label>
+          <a href="#" className="text-primary hover:underline">Forgot password?</a>
+        </div>
+      </form>
+    </AuthCard>
   );
 }

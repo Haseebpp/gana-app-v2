@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router";
+import { useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/state/store";
 import { register, fetchMe } from "@/state/slices/authSlice";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import AuthCard from "@/components/auth/AuthCard";
+import IconInput from "@/components/form/IconInput";
+import PasswordInput from "@/components/form/PasswordInput";
+import { User, Phone } from "lucide-react";
 
 export default function Register() {
   const dispatch = useAppDispatch();
@@ -36,47 +37,49 @@ export default function Register() {
   const topMessage = typeof error === "string" ? error : (errData as any)?.message;
 
   return (
-    <div className="grid place-items-center min-h-screen p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Create account</CardTitle>
-          <CardDescription>Join with your phone number</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={onSubmit}>
-            <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
-              {fieldErrors?.nameError && (
-                <div className="text-xs text-red-600">{fieldErrors.nameError}</div>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="number">Phone number</Label>
-              <Input id="number" placeholder="e.g. +15551234567" value={number} onChange={(e) => setNumber(e.target.value)} required />
-              {fieldErrors?.numberError && (
-                <div className="text-xs text-red-600">{fieldErrors.numberError}</div>
-              )}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              {fieldErrors?.passwordError && (
-                <div className="text-xs text-red-600">{fieldErrors.passwordError}</div>
-              )}
-            </div>
-            <Button type="submit" disabled={status === "loading"} className="w-full">
-              {status === "loading" ? "Creating..." : "Create account"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="justify-between text-sm">
-          <span className="text-gray-500">Already have an account?</span>
-          <Link to="/login" className="text-blue-600 underline">
-            Sign in
-          </Link>
-        </CardFooter>
-      </Card>
-    </div>
+    <AuthCard active="register">
+      <form className="space-y-4" onSubmit={onSubmit}>
+        <IconInput
+          id="name"
+          label="Full name"
+          icon={User}
+          value={name}
+          onChange={setName}
+          placeholder="e.g. Haseeb P P"
+          autoComplete="name"
+          error={fieldErrors?.nameError}
+        />
+
+        <IconInput
+          id="number"
+          label="Mobile number"
+          type="tel"
+          icon={Phone}
+          value={number}
+          onChange={setNumber}
+          placeholder="05XXXXXXXX"
+          autoComplete="tel"
+          error={fieldErrors?.numberError}
+        />
+
+        <PasswordInput
+          id="password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          placeholder="Create a strong password"
+          autoComplete="new-password"
+          error={fieldErrors?.passwordError}
+        />
+
+        <p className="pt-1 text-xs text-muted-foreground">
+          By creating an account, you agree to our Terms & Privacy. We’ll only use your number for booking updates.
+        </p>
+
+        <Button type="submit" disabled={status === "loading"} className="w-full h-11 rounded-lg">
+          {status === "loading" ? "Creating..." : "Create account"}
+        </Button>
+      </form>
+    </AuthCard>
   );
 }
