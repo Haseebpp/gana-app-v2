@@ -42,6 +42,10 @@ build/
 **/dist/
 **/build/
 
+# TypeScript incremental build info
+*.tsbuildinfo
+
+
 # Common framework outputs
 .next/
 .nuxt/
